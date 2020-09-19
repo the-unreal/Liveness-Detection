@@ -7,13 +7,18 @@ import cv2
 
 def predictperson():
     video_capture = cv2.VideoCapture(0)
+    
     while(True):
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
         ret,frame = video_capture.read()
+        
+        
+        # detect faces in the image
+        
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
         faces = faceCascade.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=5,minSize=(30, 30))
         height, width, channels = frame.shape
         
@@ -32,16 +37,17 @@ def predictperson():
             image = image.astype("float") / 255.0
             image = img_to_array(image)
             image = np.expand_dims(image, axis=0)
-            (real, fake) = model.predict(image)[0]
+            (fake, real) = model.predict(image)[0]
             
             if fake > real:
-                label = "real"
+                label = "fake"
             else:
-                label= "fake"
+                label= "real"
             label = "{}".format(label)
             cv2.putText(frame,label, (10, 30),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
         cv2.imshow("Frame",frame)
+        
 
 model = load_model("models/the-unreal.hdf5")
 cascPath = "haarcascade_frontalface_default.xml"
